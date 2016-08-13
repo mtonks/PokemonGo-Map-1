@@ -19,11 +19,16 @@ Search Architecture:
 
 import os
 import logging
-import time
 import math
 import threading
 import json
 import geojson
+
+import random
+import time
+
+
+
 from threading import Thread, Lock
 from queue import Queue, Empty
 from operator import itemgetter
@@ -188,6 +193,17 @@ def search_overseer_thread(args, new_location_queue, pause_bit, encryption_lib_p
 
 def search_worker_thread(args, account, search_items_queue, parse_lock, encryption_lib_path):
 
+    # If we have more than one account, stagger the logins such that they occur evenly over scan_delay
+    if len(args.accounts) > 1:
+        if len(args.accounts) > args.scan_delay:  # force ~1 second delay between threads if you have many accounts
+            delay = args.accounts.index(account) \
+                + ((random.random() - .5) / 2) if args.accounts.index(account) > 0 else 0
+        else:
+            delay = (args.scan_delay / len(args.accounts)) * args.accounts.index(account)
+
+        log.debug('Delaying thread startup for %.2f seconds', delay)
+        time.sleep(delay)
+
     log.debug('Search worker thread starting')
 
     # The forever loop for the thread
@@ -256,7 +272,7 @@ def search_worker_thread(args, account, search_items_queue, parse_lock, encrypti
 					time.sleep(args.scan_delay)
                 else: 
                     log.info('cant keep up. skipping')
-                
+     
         # catch any process exceptions, log them, and continue the thread
         except Exception as e:
             log.exception('Exception in search_worker: %s. Username: %s', e, account['username'])
