@@ -26,7 +26,7 @@ import geojson
 
 import random
 import time
-
+import geopy.distance as geopy_distance
 
 
 from threading import Thread, Lock
@@ -38,7 +38,7 @@ from pgoapi import utilities as util
 from pgoapi.exceptions import AuthException
 
 from . import config
-from .models import parse_map
+from .models import parse_map, Pokemon
 
 log = logging.getLogger(__name__)
 
@@ -172,6 +172,7 @@ def search_overseer_thread(args, new_location_queue, pause_bit, encryption_lib_p
     log.info('total of %d spawns to track',len(spawns))
     #find start position
     pos = SbSearch(spawns, (curSec()+3540)%3600)
+
     while True:
         while timeDif(curSec(),spawns[pos]['time']) < 60:
             time.sleep(1)
@@ -272,7 +273,7 @@ def search_worker_thread(args, account, search_items_queue, parse_lock, encrypti
 					time.sleep(args.scan_delay)
                 else: 
                     log.info('cant keep up. skipping')
-     
+
         # catch any process exceptions, log them, and continue the thread
         except Exception as e:
             log.exception('Exception in search_worker: %s. Username: %s', e, account['username'])

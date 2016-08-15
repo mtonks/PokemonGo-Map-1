@@ -103,6 +103,8 @@ def get_args():
     parser.add_argument('-k', '--gmaps-key',
                         help='Google Maps Javascript API Key',
                         required=True)
+    parser.add_argument('--spawnpoints-only', help='Only scan locations with spawnpoints in them.',
+                        action='store_true', default=False)
     parser.add_argument('-C', '--cors', help='Enable CORS on web server',
                         action='store_true', default=False)
     parser.add_argument('-D', '--db', help='Database filename',
@@ -134,6 +136,8 @@ def get_args():
                         type=int, default=5)
     parser.add_argument('-wh', '--webhook', help='Define URL(s) to POST webhook information to',
                         nargs='*', default=False, dest='webhooks')
+    parser.add_argument('--ssl-certificate', help='Path to SSL certificate file')
+    parser.add_argument('--ssl-privatekey', help='Path to SSL private key file')
     parser.set_defaults(DEBUG=False)
 
     args = parser.parse_args()
